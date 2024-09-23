@@ -1,7 +1,7 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { SolanaSafeTransfer } from "../target/types/solana_safe_transfer";
-import { Keypair, Transaction, Signer } from "@solana/web3.js";
+import { Keypair, Transaction } from "@solana/web3.js";
 import { expect } from "chai";
 import { initializeKeypair } from "@solana-developers/helpers";
 import { log } from "./helpers";
@@ -11,7 +11,6 @@ const debug = true;
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 describe("solana-safe-transfer", () => {
-  // Configure the client to use the local cluster.
   anchor.setProvider(anchor.AnchorProvider.env());
 
   const program = anchor.workspace
@@ -62,8 +61,7 @@ describe("solana-safe-transfer", () => {
       confirmationPDA
     );
 
-    // get pda address
-    const [pda] = await anchor.web3.PublicKey.findProgramAddress(
+    const [pda] = anchor.web3.PublicKey.findProgramAddressSync(
       [wallet.publicKey.toBuffer(), Buffer.from("ca")],
       program.programId
     );
@@ -75,7 +73,6 @@ describe("solana-safe-transfer", () => {
 
     log({ debug, message: ["Sender balance", senderBalance] });
 
-    // Transfer SOL
     const sig = await program.rpc.transferSol(
       new anchor.BN(1000000),
       confirmationAccount.code,
@@ -126,15 +123,13 @@ describe("solana-safe-transfer", () => {
     const sender = new Keypair();
     log({ debug, message: ["Sender", sender.publicKey.toString()] });
 
-    // get pda address
-    const [pda, bump] = await anchor.web3.PublicKey.findProgramAddress(
+    const [pda] = anchor.web3.PublicKey.findProgramAddressSync(
       [wallet.publicKey.toBuffer(), Buffer.from("ca")],
       program.programId
     );
 
     log({ debug, message: ["PDA", pda.toString()] });
 
-    // initialize sender account and transfer SOL to it
     const tx = new Transaction().add(
       anchor.web3.SystemProgram.createAccount({
         fromPubkey: wallet.publicKey,
@@ -155,7 +150,6 @@ describe("solana-safe-transfer", () => {
     );
     log({ debug, message: ["Sender balance", senderBalance] });
 
-    // Transfer SOL
     try {
       const sig = await program.rpc.transferSol(
         new anchor.BN(1000000),
@@ -182,4 +176,5 @@ describe("solana-safe-transfer", () => {
     );
     expect(senderBalanceAfter).eq(senderBalance);
   });
+
 });
