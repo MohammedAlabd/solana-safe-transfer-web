@@ -3,9 +3,10 @@ import { Program } from "@coral-xyz/anchor";
 import { SolanaSafeTransfer } from "../target/types/solana_safe_transfer";
 import { Keypair, Transaction, Signer } from "@solana/web3.js";
 import { expect } from "chai";
+import { initializeKeypair } from "@solana-developers/helpers";
 import { log } from "./helpers";
 
-const debug = false;
+const debug = true;
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -45,7 +46,7 @@ describe("solana-safe-transfer", () => {
   });
 
   it("Should transfer SOL with the right confirmation code", async () => {
-    const sender = new Keypair();
+    const sender = await initializeKeypair(connection);
     log({ debug, message: ["Sender", sender.publicKey.toString()] });
 
     const reciverPublicKey = owner;
@@ -64,21 +65,6 @@ describe("solana-safe-transfer", () => {
       [wallet.publicKey.toBuffer(), Buffer.from("ca")],
       program.programId
     );
-
-    // initialize sender account and transfer SOL to it
-    const tx = new Transaction().add(
-      anchor.web3.SystemProgram.createAccount({
-        fromPubkey: wallet.publicKey,
-        newAccountPubkey: sender.publicKey,
-        lamports: 1000000000,
-        space: 0,
-        programId: anchor.web3.SystemProgram.programId,
-      })
-    );
-
-    const sig0 = await connection.sendTransaction(tx, [wallet.payer, sender]);
-    await connection.confirmTransaction(sig0, "confirmed");
-    log({ debug, message: ["Create account", sig0] });
 
     const senderBalance = await connection.getBalance(
       sender.publicKey,
@@ -193,94 +179,5 @@ describe("solana-safe-transfer", () => {
       "finalized"
     );
     expect(senderBalanceAfter).eq(senderBalance);
-  });
-
-  it("Should transfer SPL tokens with the right confirmation code", async () => {
-    const sender = new Keypair();
-    log({ debug, message: ["Sender", sender.publicKey.toString()] });
-
-    const reciverPublicKey = owner;
-
-    const [confirmationPDA] = anchor.web3.PublicKey.findProgramAddressSync(
-      [reciverPublicKey.toBuffer(), Buffer.from("ca")],
-      program.programId
-    );
-
-    const confirmationAccount = await program.account.confirmationAccount.fetch(
-      confirmationPDA
-    );
-
-    const [pda] = await anchor.web3.PublicKey.findProgramAddress(
-      [wallet.publicKey.toBuffer(), Buffer.from("ca")],
-      program.programId
-    );
-
-    // initialize sender account and transfer SOL to it
-    const tx = new Transaction().add(
-      anchor.web3.SystemProgram.createAccount({
-        fromPubkey: wallet.publicKey,
-        newAccountPubkey: sender.publicKey,
-        lamports: 1000000000,
-        space: 0,
-        programId: anchor.web3.SystemProgram.programId,
-      })
-    );
-
-    const sig0 = await connection.sendTransaction(tx, [wallet.payer, sender]);
-    await connection.confirmTransaction(sig0, "confirmed");
-    log({ debug, message: ["Create account", sig0] });
-
-    const senderBalance = await connection.getBalance(
-      sender.publicKey,
-      "finalized"
-    );
-
-    log({ debug, message: ["Sender balance", senderBalance] });
-
-    // Transfer SOL
-    const sig = await program.rpc.transferSol(
-      new anchor.BN(1000000),
-      confirmationAccount.code,
-      {
-        accounts: {
-          to: wallet.publicKey,
-          from: sender.publicKey,
-          systemProgram: anchor.web3.SystemProgram.programId,
-          confirmationAccount: pda,
-        },
-        signers: [sender],
-      }
-    );
-    log({ debug, message: ["Transfer SOL", sig] });
-
-    try {
-      const tx = await program.rpc.transferSol(
-        new anchor.BN(1000000),
-        "wrong code",
-        {
-          accounts: {
-            to: wallet.publicKey,
-            from: sender.publicKey,
-            systemProgram: anchor.web3.SystemProgram.programId,
-            confirmationAccount: pda,
-          },
-          signers: [sender],
-        }
-      );
-
-      await connection.confirmTransaction(tx, "confirmed");
-      const txDetails = await program.provider.connection.getTransaction(tx, {
-        maxSupportedTransactionVersion: 0,
-        commitment: "confirmed",
-      });
-
-      const logs = txDetails?.meta?.logMessages || null;
-      log({ debug, message: ["Logs", logs] });
-
-      if (!logs) {
-        log({ debug, message: ["No logs found"] });
-      }
-      log({ debug, message: ["Your transaction signature", tx] });
-    } catch (e) {}
   });
 });
