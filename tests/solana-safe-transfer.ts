@@ -1,7 +1,7 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { SolanaSafeTransfer } from "../target/types/solana_safe_transfer";
-import { Transaction } from "@solana/web3.js";
+import { Transaction, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { expect } from "chai";
 import {
   confirmTransaction,
@@ -78,105 +78,64 @@ describe("solana-safe-transfer", () => {
       confirmationPDA
     );
 
-    const [pda] = anchor.web3.PublicKey.findProgramAddressSync(
-      [wallet.publicKey.toBuffer(), Buffer.from("ca")],
-      program.programId
-    );
+    const senderBalanceBefore = await connection.getBalance(sender.publicKey);
 
-    const senderBalance = await connection.getBalance(
-      sender.publicKey,
-      "finalized"
-    );
+    const transferAmount = 0.5 * LAMPORTS_PER_SOL;
 
-    log({ debug, message: ["Sender balance", senderBalance] });
+    const tx = await program.methods
+      .transferSol(new anchor.BN(transferAmount), confirmationAccount.code)
+      .accounts({
+        to: wallet.publicKey,
+        from: sender.publicKey,
+        systemProgram: anchor.web3.SystemProgram.programId,
+        confirmationAccount: confirmationPDA,
+      })
+      .signers([sender])
+      .rpc();
 
-    const sig = await program.rpc.transferSol(
-      new anchor.BN(1000000),
-      confirmationAccount.code,
-      {
-        accounts: {
-          to: wallet.publicKey,
-          from: sender.publicKey,
-          systemProgram: anchor.web3.SystemProgram.programId,
-          confirmationAccount: pda,
-        },
-        signers: [sender],
-      }
-    );
-    log({ debug, message: ["Transfer SOL", sig] });
+    const sig = await confirmTransaction(connection, tx);
 
-    try {
-      const tx = await program.rpc.transferSol(
-        new anchor.BN(1000000),
-        "wrong code",
-        {
-          accounts: {
-            to: wallet.publicKey,
-            from: sender.publicKey,
-            systemProgram: anchor.web3.SystemProgram.programId,
-            confirmationAccount: pda,
-          },
-          signers: [sender],
-        }
-      );
+    const senderBalanceAfter = await connection.getBalance(sender.publicKey);
 
-      await connection.confirmTransaction(tx, "confirmed");
-      const txDetails = await program.provider.connection.getTransaction(tx, {
-        maxSupportedTransactionVersion: 0,
-        commitment: "confirmed",
-      });
+    expect(senderBalanceAfter).eq(senderBalanceBefore - transferAmount);
 
-      const logs = txDetails?.meta?.logMessages || null;
-      log({ debug, message: ["Logs", logs] });
-
-      if (!logs) {
-        log({ debug, message: ["No logs found"] });
-      }
-      log({ debug, message: ["Your transaction signature", tx] });
-    } catch (e) {}
+    log({ debug, message: ["Your transaction signature", sig] });
   });
 
   it("Should fails to transfer SOL with wrong confirmation code", async () => {
     const sender = await initializeKeypair(connection, {
       envVariableName: "SENDER_KEYPAIR",
     });
-    log({ debug, message: ["Sender", sender.publicKey.toString()] });
 
-    const [pda] = anchor.web3.PublicKey.findProgramAddressSync(
+    const [confirmationPDA] = anchor.web3.PublicKey.findProgramAddressSync(
       [wallet.publicKey.toBuffer(), Buffer.from("ca")],
       program.programId
     );
 
-    const senderBalance = await connection.getBalance(
-      sender.publicKey,
-      "finalized"
-    );
+    const senderBalance = await connection.getBalance(sender.publicKey);
     log({ debug, message: ["Sender balance", senderBalance] });
 
     try {
-      const sig = await program.rpc.transferSol(
-        new anchor.BN(1000000),
-        "wrong code",
-        {
-          accounts: {
-            to: wallet.publicKey,
-            from: sender.publicKey,
-            systemProgram: anchor.web3.SystemProgram.programId,
-            confirmationAccount: pda,
-          },
-          signers: [sender],
-        }
-      );
+      const tx = await program.methods
+        .transferSol(new anchor.BN(1000000), "wrong code")
+        .accounts({
+          to: wallet.publicKey,
+          from: sender.publicKey,
+          systemProgram: anchor.web3.SystemProgram.programId,
+          confirmationAccount: confirmationPDA,
+        })
+        .signers([sender])
+        .rpc();
+
+      const sig = await confirmTransaction(connection, tx);
+
       log({ debug, message: ["Transfer SOL sig", sig] });
       throw new Error("Should fail");
     } catch (e) {
       expect(e.error.errorCode.code).eq("InvalidConfirmationCode");
     }
 
-    const senderBalanceAfter = await connection.getBalance(
-      sender.publicKey,
-      "finalized"
-    );
+    const senderBalanceAfter = await connection.getBalance(sender.publicKey);
     expect(senderBalanceAfter).eq(senderBalance);
   });
 
