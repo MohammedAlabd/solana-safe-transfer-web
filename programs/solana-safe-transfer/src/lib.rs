@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken,
-    token::{transfer_checked, Mint, Token, TokenAccount, TransferChecked},
+    token_interface::{transfer_checked, Mint, TokenAccount, TokenInterface, TransferChecked},
 };
 
 mod errors;
@@ -67,6 +67,9 @@ pub mod solana_safe_transfer {
     ) -> Result<()> {
         // Transfer SPL
         let confirmation_account = &ctx.accounts.confirmation_account;
+
+        msg!("ca key: {:?}", confirmation_account.key().to_string(),);
+        msg!("ca key: {:?}", ctx.accounts.from_token_account.amount);
         if confirmaction_code != confirmation_account.code {
             return Err(InvalidConfirmationCode.into());
         }
@@ -108,17 +111,19 @@ pub struct TransferSol<'info> {
 
 #[derive(Accounts)]
 pub struct TransferSpl<'info> {
-    pub token_program: Program<'info, Token>,
+    pub token_program: Interface<'info, TokenInterface>,
     pub system_program: Program<'info, System>,
     pub associated_token_program: Program<'info, AssociatedToken>,
-    pub mint: Account<'info, Mint>,
+    pub mint: InterfaceAccount<'info, Mint>,
 
-    #[account(mut, associated_token::mint = mint, associated_token::authority = from_authority)]
-    pub from_token_account: Account<'info, TokenAccount>,
+    // #[account(mut, associated_token::mint = mint, associated_token::authority = from_authority)]
+    #[account(mut, token::mint = mint)]
+    pub from_token_account: InterfaceAccount<'info, TokenAccount>,
     pub from_authority: Signer<'info>,
 
-    #[account(mut, associated_token::mint = mint, associated_token::authority = to_authority)]
-    pub to_token_account: Account<'info, TokenAccount>,
+    // #[account(mut, associated_token::mint = mint, associated_token::authority = to_authority)]
+    #[account(mut, token::mint = mint)]
+    pub to_token_account: InterfaceAccount<'info, TokenAccount>,
     pub to_authority: SystemAccount<'info>,
     #[account(seeds = [to_authority.key().as_ref(), b"ca"], bump)]
     pub confirmation_account: Account<'info, ConfirmationAccount>,
