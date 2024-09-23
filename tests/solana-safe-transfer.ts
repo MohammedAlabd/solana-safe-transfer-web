@@ -46,7 +46,9 @@ describe("solana-safe-transfer", () => {
   });
 
   it("Should transfer SOL with the right confirmation code", async () => {
-    const sender = await initializeKeypair(connection);
+    const sender = await initializeKeypair(connection, {
+      envVariableName: "SENDER_KEYPAIR",
+    });
     log({ debug, message: ["Sender", sender.publicKey.toString()] });
 
     const reciverPublicKey = owner;
