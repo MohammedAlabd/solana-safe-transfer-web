@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/solana_safe_transfer.json`.
  */
 export type SolanaSafeTransfer = {
-  address: 'Enj1cDwz8kDR95U2SayoDG7LXNdvxCKgNguV2gXHy2fV';
+  address: '3zExAojjXHa545RTzs27AGgypcEF5xPhVAs4MA5PBbEB';
   metadata: {
     name: 'solanaSafeTransfer';
     version: '0.1.0';
