@@ -1,0 +1,134 @@
+{
+  "address": "Enj1cDwz8kDR95U2SayoDG7LXNdvxCKgNguV2gXHy2fV",
+  "metadata": {
+    "name": "solana_safe_transfer",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "initialize",
+      "discriminator": [175, 175, 109, 31, 13, 152, 155, 237],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program"
+        },
+        {
+          "name": "confirmation_account",
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "transfer_sol",
+      "discriminator": [78, 10, 236, 247, 109, 117, 21, 76],
+      "accounts": [
+        {
+          "name": "from",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "to",
+          "writable": true
+        },
+        {
+          "name": "system_program"
+        },
+        {
+          "name": "confirmation_account"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "confirmaction_code",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "transfer_spl",
+      "discriminator": [39, 188, 128, 58, 110, 48, 44, 182],
+      "accounts": [
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "system_program"
+        },
+        {
+          "name": "associated_token_program"
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "from_token_account",
+          "writable": true
+        },
+        {
+          "name": "from_authority",
+          "signer": true
+        },
+        {
+          "name": "to_token_account",
+          "writable": true
+        },
+        {
+          "name": "to_authority"
+        },
+        {
+          "name": "confirmation_account"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "confirmaction_code",
+          "type": "string"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "ConfirmationAccount",
+      "discriminator": [216, 45, 251, 135, 250, 128, 11, 247]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InvalidConfirmationCode",
+      "msg": "The confirmation code is invalid"
+    }
+  ],
+  "types": [
+    {
+      "name": "ConfirmationAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "code",
+            "type": "string"
+          }
+        ]
+      }
+    }
+  ]
+}

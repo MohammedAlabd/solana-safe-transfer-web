@@ -1,8 +1,8 @@
 import * as anchor from '@coral-xyz/anchor';
 import { useAnchorWallet, useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { useEffect, useState } from 'react';
-import idl from '../../../../target/idl/solana_safe_transfer.json';
-import { SolanaSafeTransfer } from '../../../../target/types/solana_safe_transfer';
+import idl from '../../programs/solana-safe-transfer/idl.json';
+import { SolanaSafeTransfer } from '../../programs/solana-safe-transfer/types';
 import { LAMPORTS_PER_SOL, PublicKey, SystemProgram } from '@solana/web3.js';
 
 export type SafeTransferSOLMethodType = (_: {
