@@ -2,7 +2,11 @@
   "license": "ISC",
   "scripts": {
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
-    "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check"
+    "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
+    "dev": "cd app && ./node_modules/.bin/next dev",
+    "build": "cd app && ./node_modules/.bin/next build",
+    "start": "cd app && ./node_modules/.bin/next start",
+    "postinstall": "cd app && bun install"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.30.1",

@@ -1,11 +1,8 @@
-"use client";
-import React from "react";
-import dynamic from "next/dynamic";
+'use client';
+import React from 'react';
+import dynamic from 'next/dynamic';
 
-const ConnectWalletButton = dynamic(
-  () => import("../wallet/WalletConnectButton"),
-  { ssr: false }
-);
+const ConnectWalletButton = dynamic(() => import('../wallet/WalletConnectButton'), { ssr: false });
 
 function Navbar() {
   return (

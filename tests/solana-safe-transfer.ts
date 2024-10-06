@@ -34,7 +34,7 @@ describe("solana-safe-transfer", () => {
   it("Is initialized!", async () => {
     const [confirmationPDA] = anchor.web3.PublicKey.findProgramAddressSync(
       [owner.toBuffer(), Buffer.from("ca")],
-      program.programId
+      program.programId,
     );
 
     const tx = await program.methods
@@ -71,12 +71,11 @@ describe("solana-safe-transfer", () => {
 
     const [confirmationPDA] = anchor.web3.PublicKey.findProgramAddressSync(
       [reciverPublicKey.toBuffer(), Buffer.from("ca")],
-      program.programId
+      program.programId,
     );
 
-    const confirmationAccount = await program.account.confirmationAccount.fetch(
-      confirmationPDA
-    );
+    const confirmationAccount =
+      await program.account.confirmationAccount.fetch(confirmationPDA);
 
     const senderBalanceBefore = await connection.getBalance(sender.publicKey);
 
@@ -109,7 +108,7 @@ describe("solana-safe-transfer", () => {
 
     const [confirmationPDA] = anchor.web3.PublicKey.findProgramAddressSync(
       [wallet.publicKey.toBuffer(), Buffer.from("ca")],
-      program.programId
+      program.programId,
     );
 
     const senderBalance = await connection.getBalance(sender.publicKey);
@@ -169,7 +168,7 @@ describe("solana-safe-transfer", () => {
       connection,
       senderAta,
       "confirmed",
-      TOKEN_2022_PROGRAM_ID
+      TOKEN_2022_PROGRAM_ID,
     );
     log({ debug, message: ["Associate Token Account =====>", accountDetails] });
 
@@ -177,18 +176,17 @@ describe("solana-safe-transfer", () => {
 
     const [confirmationPDA] = anchor.web3.PublicKey.findProgramAddressSync(
       [reciverPublicKey.toBuffer(), Buffer.from("ca")],
-      program.programId
+      program.programId,
     );
 
-    const confirmationAccount = await program.account.confirmationAccount.fetch(
-      confirmationPDA
-    );
+    const confirmationAccount =
+      await program.account.confirmationAccount.fetch(confirmationPDA);
 
     const receiverAta = getAssociatedTokenAddressSync(
       mint.publicKey,
       wallet.publicKey,
       false,
-      TOKEN_2022_PROGRAM_ID
+      TOKEN_2022_PROGRAM_ID,
     );
 
     log({ debug, message: ["receiverAta", receiverAta] });
@@ -198,14 +196,14 @@ describe("solana-safe-transfer", () => {
       receiverAta,
       wallet.publicKey,
       mint.publicKey,
-      TOKEN_2022_PROGRAM_ID
+      TOKEN_2022_PROGRAM_ID,
     );
 
     // Transfer SOL
     const transferSplIx = await program.methods
       .transferSpl(
         new anchor.BN(5 * 10 ** tokenDecimals),
-        confirmationAccount.code
+        confirmationAccount.code,
       )
       .accounts({
         mint: mint.publicKey,
@@ -265,7 +263,7 @@ describe("solana-safe-transfer", () => {
       connection,
       senderAta,
       "confirmed",
-      TOKEN_2022_PROGRAM_ID
+      TOKEN_2022_PROGRAM_ID,
     );
 
     log({
@@ -277,18 +275,17 @@ describe("solana-safe-transfer", () => {
 
     const [confirmationPDA] = anchor.web3.PublicKey.findProgramAddressSync(
       [reciverPublicKey.toBuffer(), Buffer.from("ca")],
-      program.programId
+      program.programId,
     );
 
-    const confirmationAccount = await program.account.confirmationAccount.fetch(
-      confirmationPDA
-    );
+    const confirmationAccount =
+      await program.account.confirmationAccount.fetch(confirmationPDA);
 
     const receiverAta = getAssociatedTokenAddressSync(
       mint.publicKey,
       wallet.publicKey,
       false,
-      TOKEN_2022_PROGRAM_ID
+      TOKEN_2022_PROGRAM_ID,
     );
 
     log({ debug, message: ["receiverAta", receiverAta] });
@@ -298,7 +295,7 @@ describe("solana-safe-transfer", () => {
       receiverAta,
       wallet.publicKey,
       mint.publicKey,
-      TOKEN_2022_PROGRAM_ID
+      TOKEN_2022_PROGRAM_ID,
     );
 
     try {
@@ -339,7 +336,7 @@ describe("solana-safe-transfer", () => {
       connection,
       senderAta,
       "confirmed",
-      TOKEN_2022_PROGRAM_ID
+      TOKEN_2022_PROGRAM_ID,
     );
 
     expect(accountDetailsBefore.amount).eq(accountDetailsAfter.amount);

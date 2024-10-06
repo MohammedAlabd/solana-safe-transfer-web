@@ -11,16 +11,11 @@ import {
   Stack,
   useColorModeValue,
 } from '@chakra-ui/react';
-import { useSolanaSafeProgram, type SafeTransferSOLMethodType } from '../program/useSolanaSafeProgram';
-import { Field, Form, Formik } from 'formik';
+import { useSolanaSafeProgram } from '../program/useSolanaSafeProgram';
+import { Form, Formik } from 'formik';
 import * as yup from 'yup';
 import { isSolanaPublicKey } from '@/utils/helpers';
 import { PublicKey } from '@solana/web3.js';
-
-type Props = {
-  onTransfer: SafeTransferSOLMethodType;
-  isLoading: boolean;
-};
 
 const validationSchema = yup.object().shape({
   amount: yup.number().min(0).required('Amount is required'),
@@ -31,8 +26,8 @@ const validationSchema = yup.object().shape({
     .required('Public key is required'),
 });
 
-export default function TransferSOLForm({ onTransfer, isLoading }: Props) {
-  const { isTransferring, safeTransferSOL } = useSolanaSafeProgram();
+export default function TransferSOLForm() {
+  const { safeTransferSOL } = useSolanaSafeProgram();
   const initialValues = {
     amount: 0,
     address: '',
