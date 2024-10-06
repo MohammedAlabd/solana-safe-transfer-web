@@ -5,6 +5,7 @@ export const isSolanaPublicKey = (value: string) => {
     new PublicKey(value);
     return true;
   } catch (err) {
+    console.error(err);
     return false;
   }
 };
