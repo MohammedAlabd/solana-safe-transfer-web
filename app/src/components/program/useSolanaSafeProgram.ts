@@ -1,20 +1,23 @@
-import * as anchor from "@coral-xyz/anchor";
-import {
-  useAnchorWallet,
-  useConnection,
-  useWallet,
-} from "@solana/wallet-adapter-react";
-import { useEffect, useState } from "react";
-import idl from "../../../../target/idl/solana_safe_transfer.json";
-import { SolanaSafeTransfer } from "../../../../target/types/solana_safe_transfer";
+import * as anchor from '@coral-xyz/anchor';
+import { useAnchorWallet, useConnection, useWallet } from '@solana/wallet-adapter-react';
+import { useEffect, useState } from 'react';
+import idl from '../../../../target/idl/solana_safe_transfer.json';
+import { SolanaSafeTransfer } from '../../../../target/types/solana_safe_transfer';
+import { LAMPORTS_PER_SOL, PublicKey, SystemProgram } from '@solana/web3.js';
+
+export type SafeTransferSOLMethodType = (_: {
+  reciverPublicKey: PublicKey;
+  confirmationCode: string;
+  amount: number;
+}) => Promise<void>;
 
 export const useSolanaSafeProgram = () => {
   const wallet = useWallet();
   const { connection } = useConnection();
   const anchorWallet = useAnchorWallet();
 
-  const [solanaSafeTransfer, setSolanaSafeTransfer] =
-    useState<anchor.Program<SolanaSafeTransfer> | null>(null);
+  const [solanaSafeTransfer, setSolanaSafeTransfer] = useState<anchor.Program<SolanaSafeTransfer> | null>(null);
+  const [isTransferring, setIsTransferring] = useState(false);
 
   useEffect(() => {
     if (anchorWallet) {
@@ -29,7 +32,39 @@ export const useSolanaSafeProgram = () => {
 
       setSolanaSafeTransfer(new anchor.Program(idl as anchor.Idl) as any);
     }
-  }, [anchorWallet]);
+  }, [anchorWallet, connection]);
 
-  return { wallet, solanaSafeTransfer, connection };
+  const safeTransferSOL: SafeTransferSOLMethodType = async (options) => {
+    const { reciverPublicKey, confirmationCode, amount } = options;
+    if (!solanaSafeTransfer || !wallet.publicKey) return;
+
+    setIsTransferring(true);
+
+    const [confirmationPDA] = PublicKey.findProgramAddressSync(
+      [reciverPublicKey.toBuffer(), Buffer.from('ca')],
+      solanaSafeTransfer.programId,
+    );
+
+    try {
+      const tx = await solanaSafeTransfer.methods
+        .transferSol(new anchor.BN(amount * LAMPORTS_PER_SOL), confirmationCode)
+        .accounts({
+          to: reciverPublicKey,
+          from: wallet.publicKey,
+          systemProgram: SystemProgram.programId,
+          confirmationAccount: confirmationPDA,
+        })
+        .rpc();
+      console.log('Transaction:', tx);
+
+      await connection.confirmTransaction(tx);
+    } catch (e) {
+      console.error(e);
+      throw e;
+    } finally {
+      setIsTransferring(false);
+    }
+  };
+
+  return { wallet, solanaSafeTransfer, connection, safeTransferSOL, isTransferring };
 };
