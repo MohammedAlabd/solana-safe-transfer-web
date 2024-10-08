@@ -14,7 +14,15 @@ export default function Home() {
     <Container maxW="900px">
       <Hero />
       {connected ? (
-        <Flex minH={'100vh'} align={'center'} justify={'space-between'}>
+        <Flex
+          mt="20"
+          direction={{
+            sm: 'column-reverse',
+            md: 'row',
+          }}
+          align={'center'}
+          justify={'space-between'}
+        >
           <ConfirmationCode />
           <SafeTransfer />
         </Flex>
