@@ -35,7 +35,7 @@ export default function TransferSOLForm() {
   };
 
   return (
-    <Flex minH={'100vh'} align={'center'} justify={'center'} bg={useColorModeValue('gray.50', 'gray.800')}>
+    <Flex align={'center'} justify={'center'} bg={useColorModeValue('gray.50', 'gray.800')}>
       <Stack
         spacing={4}
         w={'full'}

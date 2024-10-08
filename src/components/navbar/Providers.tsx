@@ -6,6 +6,7 @@ import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import '@solana/wallet-adapter-react-ui/styles.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ChakraProvider } from '@chakra-ui/react';
+import { theme } from '@/utils/theme';
 
 const queryClient = new QueryClient();
 
@@ -19,7 +20,7 @@ const Providers: FC<{ children: ReactNode }> = ({ children }) => {
   );
 
   return (
-    <ChakraProvider>
+    <ChakraProvider theme={theme}>
       <QueryClientProvider client={queryClient}>
         <ConnectionProvider endpoint={SOLANA_RPC_URL}>
           <WalletProvider wallets={wallets} autoConnect>

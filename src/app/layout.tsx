@@ -3,6 +3,7 @@ import localFont from 'next/font/local';
 import './globals.css';
 import Navbar from '@/components/navbar/Navbar';
 import Providers from '@/components/navbar/Providers';
+import { Flex } from '@chakra-ui/react';
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -30,7 +31,9 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Providers>
           <Navbar />
-          <div className="container my-3 mt-20 p-8">{children}</div>
+          <Flex minH="100vh" pb="10" pt={{ md: 20, sm: 70 }} justify={'center'} bg="gray.50">
+            {children}
+          </Flex>
         </Providers>
       </body>
     </html>
