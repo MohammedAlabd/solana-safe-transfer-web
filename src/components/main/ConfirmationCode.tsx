@@ -49,8 +49,6 @@ export default function ConfirmationCode() {
     refetch();
   }, [wallet.publicKey, wallet.connected, solanaSafeTransfer]);
 
-  // if (error) return <div>error: {error.message}</div>;
-
   const [isCopied, setIsCopied] = useState(false);
 
   const handleCopyConfirmationCode = useCallback(() => {
@@ -81,7 +79,7 @@ export default function ConfirmationCode() {
         )}
 
         {confirmationCode ? (
-          <Stack textAlign={'center'} p={6} color={useColorModeValue('gray.800', 'white')} align={'center'}>
+          <Stack textAlign={'center'} p={6} color={'gray.800'} align={'center'}>
             <Stack direction={'column'} align={'center'} justify={'center'}>
               <Text fontSize={'xl'}>Your Confirmation Code:</Text>
 
